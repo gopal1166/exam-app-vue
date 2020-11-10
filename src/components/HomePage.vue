@@ -36,9 +36,6 @@ export default {
     onStart() {
       router.push({ name: "exam", params: { username: this.username } });
     },
-    onFlavor() {
-      this.$store.commit('change', 'heelo')
-    }
   },
 };
 </script>

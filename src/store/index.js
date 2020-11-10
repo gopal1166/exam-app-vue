@@ -11,8 +11,6 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     reportData: {},
-    count: 0,
-    flavor: "",
     questions:questions, 
     correctAns: {
         1: "A",
@@ -39,13 +37,7 @@ const store = new Vuex.Store({
     }
   },
   actions: {},
-  mutations: {
-    increment(state) {
-      state.count++;
-    },
-    change(state, flavor) {
-      state.flavor = flavor;
-    },
+  mutations: { 
     setReportData(state, payload) {
       state.reportData[payload.username] = payload.marks;
     },
