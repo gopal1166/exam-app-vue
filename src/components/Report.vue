@@ -5,13 +5,15 @@
 </template>
 
 <script>
-import Vue from 'vue'
-// import { delete } from 'vue/types/umd';
+/**
+ * To display the report of users and their marks on home page
+ */
+
 export default {
   name: "report",
   data() {
     return {
-      records: { ...localStorage },
+      
       data: [
         {
           username: "John Brown",
@@ -37,16 +39,12 @@ export default {
   computed: {
     getData() {
       let data = [];
-   
-      Vue.delete(this.records, 'loglevel:webpack-dev-server');
-      Vue.delete(this.records, 'undefined');
-      for (const key in this.records) {
+      for (const key in this.$store.getters.reportData) {
         data.push({
           username: key,
-          marks: this.records[key],
+          marks: this.$store.getters.reportData[key],
         });
       }
-
       return data;
     },
   },

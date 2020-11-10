@@ -1,5 +1,6 @@
 <template>
   <div class="home-page">
+
     Username:
     
     <a-input class="username-box" placeholder="Enter username"  v-model="username" />
@@ -28,10 +29,16 @@ export default {
       username: "",
     };
   },
+  computed: {
+
+  },
   methods: {
     onStart() {
       router.push({ name: "exam", params: { username: this.username } });
     },
+    onFlavor() {
+      this.$store.commit('change', 'heelo')
+    }
   },
 };
 </script>

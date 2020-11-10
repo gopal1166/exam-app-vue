@@ -2,7 +2,7 @@
   <div class="exam-page">
     Welcome: &nbsp; {{ username }} <br /><br />
 
-    <a-row>
+    <a-row v-show="questions.length > 0">
       <a-col :span="24">
         <p>
           {{ questions[quesIndex].no }} &nbsp;
@@ -27,33 +27,44 @@
       <a-col :span="12"> </a-col>
     </a-row>
 
-  <br>
+    <br />
     <a-row>
       <a-col :span="12">
-        <a-button type="primary" @click="prevBtn" v-if="quesIndex !== 0">prev</a-button>
-        &nbsp;<a-button type="primary" @click="nextBtn" v-if="quesIndex !== questions.length - 1">
+        <a-button type="primary" @click="prevBtn" v-if="quesIndex !== 0"
+          >prev</a-button
+        >
+        &nbsp;<a-button
+          type="primary"
+          @click="nextBtn"
+          v-if="quesIndex !== this.questions.length - 1"
+        >
           next
         </a-button>
       </a-col>
 
       <a-col :span="12">
-        &nbsp;<a-button type="primary" v-if="isAllAnsSelected" @click="onSubmit">Submit</a-button>
+        &nbsp;<a-button type="primary" v-if="isAllAnsSelected" @click="onSubmit"
+          >Submit</a-button
+        >
       </a-col>
     </a-row>
 
-    <br /><br><br>
+    <br /><br /><br />
 
     <a-modal v-model="visible" title="Marks summery" @ok="handleOk">
-       no of questions answered correctly : {{ getCorrectAnswers }} <br />
-        wrong answers: {{ wrongAnswers }} <br />
-        marks archived: {{ marksAchieved }}
+      no of questions answered correctly : {{ correctAnswers }} <br />
+      wrong answers: {{ wrongAnswers }} <br />
+      marks archived: {{ marksAchieved }}
     </a-modal>
 
- 
   </div>
 </template>
 
 <script>
+/**
+ * 
+ * Exam page having quesitons and navigation buttons
+ */
 import router from "../router";
 
 export default {
@@ -67,37 +78,13 @@ export default {
         2: "",
       },
       quesIndex: 0,
-      questions: [
-        {
-          no: 1,
-          question: "What is the capital city of India",
-          options: [
-            { key: "A", value: "New Delhi" },
-            { key: "B", value: "Bangalore" },
-            { key: "C", value: "Mumbi" },
-            { key: "D", value: "Chennai" },
-          ],
-        },
-        {
-          no: 2,
-          question: "Prime minister of India",
-          options: [
-            { key: "A", value: "Narendra Modi" },
-            { key: "B", value: "Pranab Mukharji" },
-            { key: "C", value: "Virat kohli" },
-            { key: "D", value: "MS Dhoni" },
-          ],
-        },
-      ],
       selectedAns: {
         1: "",
         2: "",
+        3: "",
+        4: "",
+        5: "",
       },
-      correctAns: {
-        1: "A",
-        2: "A",
-      },
-
       correctAnswers: 0,
       wrongAnswers: 0,
       marksAchieved: 0,
@@ -118,13 +105,16 @@ export default {
     },
 
     handleOk() {
-      router.push('/')
+      router.push("/");
     },
 
+    /**
+     * @summary calculations of correct, wrong answers, marks achived
+     * and updating the store with username and marks archived
+     */
     onSubmit() {
-      const array1 = Object.values(this.correctAns);
+      const array1 = Object.values(this.getCorrectAns);
       const array2 = Object.values(this.selectedAns);
-      console.log(array1, array2);
 
       let wrongAnsList = [];
       for (let index = 0; index < array1.length; index++) {
@@ -132,8 +122,6 @@ export default {
           wrongAnsList.push(array1[index]);
         }
       }
-
-      console.log(wrongAnsList);
 
       if (wrongAnsList.length === 0) {
         // all correct
@@ -148,23 +136,33 @@ export default {
         this.correctAnswers = 0;
         this.marksAchieved = 0 - wrongAnsList.length * 0.5;
       } else {
-        const correctAnsCount = this.questions.length - wrongAnsList.length;
+        const correctAnsCount =
+          this.questions.length - wrongAnsList.length;
 
         this.correctAnswers = correctAnsCount;
         this.wrongAnswers = wrongAnsList.length;
         this.marksAchieved = correctAnsCount - wrongAnsList.length * 0.5;
       }
 
-      if (localStorage.getItem(this.getUser) === null) {
-        console.log("user", this.getUser);
-        localStorage.setItem(this.getUser, this.marksAchieved);
-      } else {
-        let userMarks = localStorage.getItem(this.getUser);
+      /** Updating username and marks in Vuex store */
+      if (
+        this.reportData &&
+        this.username in this.reportData
+      ) {
+        let userMarks = this.reportData[this.username];
         let newMarks = userMarks + ", " + this.marksAchieved;
-        localStorage.setItem(this.username, newMarks);
+        this.$store.commit("setReportData", {
+          username: this.username,
+          marks: newMarks,
+        });
+      } else {
+        this.$store.commit("setReportData", {
+          username: this.username,
+          marks: this.marksAchieved,
+        });
       }
 
-      this.visible = true
+      this.visible = true;
     },
   },
 
@@ -174,20 +172,24 @@ export default {
         (ele) => ele
       );
 
-      return this.questions.length == selectedAnsList.length;
+      return this.$store.getters.getQuestions.length == selectedAnsList.length;
     },
 
     totalMarks() {
-      return this.questions.length;
+      return this.$store.getters.getQuestions.length;
     },
 
-    getCorrectAnswers() {
-      return this.correctAnswers;
+    questions() {
+      return this.$store.getters.getQuestions;
     },
 
-    getUser() {
-      return this.username;
+    getCorrectAns() {
+      return this.$store.getters.getCorrectAns
     },
+
+    reportData() {
+      return this.$store.getters.reportData
+    }
   },
 };
 </script>
